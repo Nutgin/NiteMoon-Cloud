@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>nitemoon-cloud</artifactId>
+        <groupId>cn.nitemoon</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <description>单体版本启动模块</description>
+    <packaging>jar</packaging>
+
+    <artifactId>nitemoon-boot</artifactId>
+
+    <dependencies>
+        <!--        认证中心-->
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-auth</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--                用户权限管理-->
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-upms</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-llm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- 对象检测 -->
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-onnx</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- 代码生成 -->
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-generator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
+        <!--            安全模块-->
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-common-security</artifactId>
+        </dependency>
+        <!--            swagger-->
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-common-swagger</artifactId>
+        </dependency>
+        <!--            demo模式-->
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-common-demo</artifactId>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>cn.nitemoon</groupId>-->
+<!--            <artifactId>nitemoon-common-job</artifactId>-->
+<!--        </dependency>-->
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <includeSystemScope>true</includeSystemScope>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

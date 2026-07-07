@@ -1,0 +1,81 @@
+import apiClient from "../apiClient";
+
+export interface ${ClassName} {
+#if($pkColumn)
+  ${pkColumn.javaField}: string;
+#end
+#foreach($column in $columns)
+#if(!$column.isSuperColumn() && !$column.isPk)
+  ${column.javaField}?: #if($column.javaType == "String")string#elseif($column.javaType == "Integer" || $column.javaType == "Long" || $column.javaType == "Double" || $column.javaType == "BigDecimal")number#elseif($column.javaType == "Date")string#elseany#end;
+#end
+#end
+  createBy?: string;
+  updateBy?: string;
+  createTime?: string;
+  updateTime?: string;
+  delFlag?: string;
+  tenantId?: string;
+}
+
+export interface ${ClassName}QueryParams {
+  pageNum?: number;
+  pageSize?: number;
+#foreach($column in $columns)
+#if($column.isQuery() && !$column.isSuperColumn())
+  ${column.javaField}?: #if($column.javaType == "String")string#elseif($column.javaType == "Integer" || $column.javaType == "Long" || $column.javaType == "Double" || $column.javaType == "BigDecimal")number#elseif($column.javaType == "Date")string#elseany#end;
+#end
+#end
+}
+
+export interface ${ClassName}ListResponse {
+  records: ${ClassName}[];
+  total: number;
+}
+
+const ${ClassName}Api = {
+  List: "/${businessName}/page",
+  Operation: "/${businessName}",
+};
+
+export const query${ClassName} = (params: ${ClassName}QueryParams) => {
+  return apiClient.get<${ClassName}ListResponse>({
+    url: ${ClassName}Api.List,
+    params,
+  });
+};
+
+export const get${ClassName}ById = (id: string) => {
+  return apiClient.get<${ClassName}>({
+    url: ${ClassName}Api.Operation + "/" + id,
+  });
+};
+
+export const add${ClassName} = (data: ${ClassName}) => {
+  return apiClient.post({
+    url: ${ClassName}Api.Operation,
+    data,
+    headers: { 'Content-Type': 'application/json' },
+  });
+};
+
+export const update${ClassName} = (data: ${ClassName}) => {
+  return apiClient.put({
+    url: ${ClassName}Api.Operation,
+    data,
+    headers: { 'Content-Type': 'application/json' },
+  });
+};
+
+export const delete${ClassName} = (id: string) => {
+  return apiClient.delete({
+    url: ${ClassName}Api.Operation + "/" + id,
+  });
+};
+
+export default {
+  query${ClassName},
+  get${ClassName}ById,
+  add${ClassName},
+  update${ClassName},
+  delete${ClassName},
+};

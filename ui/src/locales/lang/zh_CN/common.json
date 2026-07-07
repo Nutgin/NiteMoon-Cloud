@@ -1,0 +1,61 @@
+{
+	"common": {
+		"okText": "确认",
+		"closeText": "关闭",
+		"cancelText": "取消",
+		"cancel": "取消",
+		"confirm": "确定",
+		"loadingText": "加载中...",
+		"saveText": "保存",
+		"delText": "删除",
+		"resetText": "重置",
+		"searchText": "搜索",
+		"queryText": "查询",
+
+		"inputText": "请输入",
+		"chooseText": "请选择",
+
+		"all": "全部",
+		"enabled": "正常",
+		"disabled": "停用",
+		"published": "已发布",
+		"unpublished": "未发布",
+		"total": "共 {{count}} 条",
+
+		"redo": "刷新",
+		"back": "返回",
+
+		"light": "亮色主题",
+		"dark": "黑暗主题",
+
+		"profile": "信息概况",
+		"teams": "团队",
+		"projects": "项目",
+		"connections": "联系人",
+
+		"about": "关于",
+		"nickName": "昵称",
+		"role": "角色",
+		"dept": "部门",
+		"contact": "联系电话",
+		"email": "邮箱",
+		"loginSuccess": "登录成功",
+		"loginFailed": "登录失败",
+		"activityTimeline": "活动时间线",
+		"hotNews": "热点新闻",
+		"hot": "热度",
+		"bannerTitle": "{{appName}} 全新升级",
+		"bannerSubtitle": "AI 应用 · 工作流 · 模型训练，全面焕新",
+		"bannerFeature1": "全新工作流引擎 — 支持上下文参数传递、多分支条件判断",
+		"bannerFeature2": "多模态大模型 — 图片/音频/视频理解，一个对话全搞定",
+		"bannerFeature3": "持久化记忆 — 可配置记忆窗口，跨会话上下文不再丢失",
+		"bannerFeature4": "模型训练平台 — 数据标注、训练、部署一站式体验",
+		"joinGitee": "关注我的gitee账号",
+		"notifications": "通知",
+		"notificationsAll": "全部",
+		"notificationsInbox": "收件箱",
+		"notificationsTeam": "团队",
+		"archiveAll": "全部归档",
+		"markAllAsRead": "全部标为已读"
+	}
+}

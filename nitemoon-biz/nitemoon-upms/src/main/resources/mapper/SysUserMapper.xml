@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.nitemoon.cloud.upms.mapper.SysUserMapper">
+
+    <!-- 用户管理结果映射，处理roles字段的类型转换 -->
+    <resultMap id="UserWithRolesResultMap" type="cn.nitemoon.cloud.upms.api.entity.SysUser">
+        <!-- 基础字段映射 -->
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="email" property="email"/>
+        <result column="avatar" property="avatar"/>
+        <result column="nike_name" property="nikeName"/>
+        <result column="dept_id" property="deptId"/>
+        <result column="phone" property="phone"/>
+        <result column="status" property="status"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="type" property="type"/>
+
+        <!-- 角色字段特殊处理：使用自定义TypeHandler将逗号分隔字符串转换为List<String> -->
+        <result column="roles" property="roles"
+                typeHandler="cn.nitemoon.cloud.common.myabtis.handler.StringToListTypeHandler"/>
+    </resultMap>
+
+    <sql id="adminPageSql">
+        sys_user.id,
+        sys_user.username,
+        sys_user.`password`,
+        sys_user.email,
+        sys_user.avatar,
+        sys_user.nike_name,
+        sys_user.dept_id,
+        sys_user.phone,
+        sys_user.`status`,
+        sys_user.del_flag,
+        sys_user.create_time,
+        sys_user.update_time,
+        sys_user.tenant_id,
+        sys_user.type,
+        sys_user.open_id
+    </sql>
+
+    <select id="adminPage" resultMap="UserWithRolesResultMap">
+        SELECT
+        <include refid="adminPageSql"/>,
+        sys_dept.dept_name AS deptName,
+        group_concat(sur.role_id) AS roles
+        FROM sys_user AS sys_user
+        LEFT JOIN sys_dept AS sys_dept ON sys_user.dept_id = sys_dept.id
+        LEFT JOIN sys_user_role AS sur ON sys_user.id = sur.user_id
+        <where>
+            AND sys_user.del_flag = '0'
+            <if test="query.username !=null and query.username !=''">
+                AND sys_user.username LIKE CONCAT('%', #{query.username}, '%')
+            </if>
+            <if test="query.phone !=null and query.phone !=''">
+                AND sys_user.phone =#{query.phone}
+            </if>
+            <if test="query.deptId !=null and query.deptId !=''">
+                AND sys_user.dept_id =#{query.deptId}
+            </if>
+        </where>
+        group by
+                 <include refid="adminPageSql"/>,sys_dept.dept_name
+    </select>
+    <select id="selectUserByName" resultType="cn.nitemoon.cloud.upms.api.entity.SysUser">
+        SELECT
+        <include refid="adminPageSql"/>
+        FROM
+        sys_user AS sys_user
+        where sys_user.username = #{username}
+        AND sys_user.del_flag = '0'
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT
+        COUNT( 1 )
+        FROM
+        `sys_user` AS sys_user
+        <where>
+            AND sys_user.del_flag = '0'
+            <if test="query.phone !=null and query.phone !=''">
+                AND sys_user.`phone` =#{query.phone}
+            </if>
+        </where>
+
+    </select>
+    <select id="selectUserByPhone" resultType="cn.nitemoon.cloud.upms.api.entity.SysUser">
+        SELECT
+        <include refid="adminPageSql"/>
+        FROM
+        sys_user AS sys_user
+        where sys_user.phone = #{phone}
+        AND sys_user.del_flag = '0'
+    </select>
+    <select id="selectUserByOpenId" resultType="cn.nitemoon.cloud.upms.api.entity.SysUser">
+        SELECT
+        <include refid="adminPageSql"/>
+        FROM
+        sys_user AS sys_user
+        where sys_user.open_id = #{openId}
+        AND sys_user.del_flag = '0'
+    </select>
+</mapper>

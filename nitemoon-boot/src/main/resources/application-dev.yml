@@ -1,0 +1,51 @@
+spring:
+  servlet:
+    multipart:
+      maxFileSize: 100MB
+      maxRequestSize: 100MB
+  cache:
+    type: redis # 缓存类型 Redis
+  data:
+    redis:
+      host: localhost
+      # password:
+      port: 6379
+      database: 0
+  # 数据库相关配置
+  datasource:
+    dynamic:
+      primary: master   # 指定默认数据源
+      datasource:
+        master:         # 注意，这里要嵌套在 datasource 下
+          url: jdbc:mysql://118.195.195.62:3306/nm?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8&allowMultiQueries=true&allowPublicKeyRetrieval=true
+          username: root
+          password: eAY59Um*3MRX
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+encode:
+  key: KFCCRAZYTHURSDAY
+
+sms:
+  ali:
+    accessKeyId: xxxxxxxxx
+    accessKeySecret: xxxxxxxxxxxxxx
+    loginTemplateCode: SMS_xxxxxxxxxx
+    loginSignName: NiteMoon
+
+#knife4j配置
+knife4j:
+  #是否启用增强设置
+  enable: true
+  #是否启用生产环境屏蔽
+  production: false
+  #是否启用登录认证
+  basic:
+    enable: false
+  setting:
+    language: zh_cn
+
+nitemoon:
+  onnx:
+    # 默认视频文件路径配置
+    default-video-path: /data/xxxxx/default.mp4
+

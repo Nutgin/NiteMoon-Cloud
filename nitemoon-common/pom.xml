@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>nitemoon-cloud</artifactId>
+        <groupId>cn.nitemoon</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
+    <artifactId>nitemoon-common</artifactId>
+    <modules>
+        <module>nitemoon-common-core</module>
+        <module>nitemoon-common-storage</module>
+        <module>nitemoon-common-mybatis</module>
+        <module>nitemoon-common-log</module>
+        <module>nitemoon-common-security</module>
+        <module>nitemoon-common-job</module>
+        <module>nitemoon-common-sms</module>
+        <module>nitemoon-common-redis</module>
+        <module>nitemoon-common-dubbo</module>
+        <module>nitemoon-common-sentinel</module>
+        <module>nitemoon-common-seata</module>
+        <module>nitemoon-common-swagger</module>
+        <module>nitemoon-common-datasource</module>
+        <module>nitemoon-common-limit</module>
+        <module>nitemoon-common-sse</module>
+        <module>nitemoon-common-repeat</module>
+        <module>nitemoon-common-mail</module>
+        <module>nitemoon-common-demo</module>
+    </modules>
+</project>

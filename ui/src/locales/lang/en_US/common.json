@@ -1,0 +1,61 @@
+{
+	"common": {
+		"okText": "OK",
+		"closeText": "Close",
+		"cancelText": "Cancel",
+		"cancel": "Cancel",
+		"confirm": "Confirm",
+		"loadingText": "Loading...",
+		"saveText": "Save",
+		"delText": "Delete",
+		"resetText": "Reset",
+		"searchText": "Search",
+		"queryText": "Search",
+
+		"inputText": "Please enter",
+		"chooseText": "Please choose",
+
+		"all": "All",
+		"enabled": "Enabled",
+		"disabled": "Disabled",
+		"published": "Published",
+		"unpublished": "Unpublished",
+		"total": "Total {{count}} items",
+
+		"redo": "Refresh",
+		"back": "Back",
+
+		"light": "Light",
+		"dark": "Dark",
+
+		"profile": "Profile",
+		"teams": "Teams",
+		"projects": "Projects",
+		"connections": "Connections",
+
+		"about": "About",
+		"nickName": "Nick Name",
+		"role": "Role",
+		"dept": "Dept",
+		"contact": "Contact",
+		"email": "Email",
+		"loginSuccess": "Login Success",
+		"loginFailed": "Login Failed",
+		"activityTimeline": "Activity Timeline",
+		"hotNews": "Hot News",
+		"hot": "Hot",
+		"bannerTitle": "{{appName}} — All New",
+		"bannerSubtitle": "AI Apps · Workflows · Model Training, fully reimagined",
+		"bannerFeature1": "Workflow Engine — context parameters, multi-branch conditions",
+		"bannerFeature2": "Multimodal LLM — image / audio / video in one conversation",
+		"bannerFeature3": "Persistent Memory — configurable window, cross-session context",
+		"bannerFeature4": "Model Training — annotation, training & deployment in one place",
+		"joinGitee": "Follow my gitee account",
+		"notifications": "Notifications",
+		"notificationsAll": "All",
+		"notificationsInbox": "Inbox",
+		"notificationsTeam": "Team",
+		"archiveAll": "Archive all",
+		"markAllAsRead": "Mark all as read"
+	}
+}

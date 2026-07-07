@@ -1,0 +1,53 @@
+{
+	"dashboard": {
+		"workbench": {
+			"welcome": "Welcome Back",
+			"todayNews": "Today's News",
+			"hotTopics": "Hot Topics",
+			"quickActions": "Quick Actions",
+			"recentActivity": "Recent Activity",
+			"statistics": "Statistics",
+			"totalUsers": "Total Users",
+			"activeUsers": "Active Users",
+			"totalProjects": "Total Projects",
+			"revenue": "Revenue",
+			"historyToday": "This Day in History",
+			"historySource": "Source: History API",
+			"zhihuNews": "Zhihu News Digest",
+			"zhihuSource": "Source: Zhihu Daily",
+			"loadHistoryFailed": "Failed to load history data",
+			"loadNewsFailed": "Failed to load news data",
+			"networkError": "Network request failed"
+		},
+		"code": {
+			"title": "Code Editor",
+			"language": "Language:",
+			"run": "Run",
+			"exit": "Exit",
+			"fullscreen": "Fullscreen",
+			"format": "Format",
+			"copy": "Copy",
+			"download": "Download",
+			"reset": "Reset",
+			"loading": "Loading editor...",
+			"htmlPreview": "HTML Preview",
+			"codeOutput": "Code Output",
+			"clear": "Clear",
+			"waiting": "Waiting for code execution...",
+			"outputPlaceholder": "Output will be displayed here",
+			"saveCode": "Save code:",
+			"copied": "Code copied to clipboard",
+			"copyFailed": "Copy failed:",
+			"runError": "Runtime error:",
+			"execFailed": "Execution failed:",
+			"htmlRendered": "HTML rendered to preview window",
+			"jsxTransform": "JSX code needs transformation..."
+		},
+		"analysis": {
+			"title": "Analysis Page",
+			"overview": "Overview",
+			"trends": "Trends",
+			"statistics": "Statistics"
+		}
+	}
+}

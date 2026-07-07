@@ -1,0 +1,1 @@
+dubboRequestFilter=filter.dubbo.common.cn.nitemoon.cloud.DubboRequestFilter

@@ -1,0 +1,735 @@
+import { Icon } from "@/components/icon";
+import { Badge } from "@/ui/badge";
+import { Button } from "@/ui/button";
+import { Card, CardContent, CardHeader } from "@/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/ui/form";
+import { Input } from "@/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/ui/radio-group";
+import { Label } from "@/ui/label";
+import { Textarea } from "@/ui/textarea";
+import Table, { type ColumnsType } from "antd/es/table";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { useState, useEffect } from "react";
+import { queryMenu, deleteMenu, addMenu, updateMenu, type SystemMenu } from "@/api/services/systemMenuService";
+import PermissionModal, { type PermissionModalProps } from "./permission-modal";
+import { isNil } from "ramda";
+import { useTranslation } from "react-i18next";
+import type { Permission_Old } from "#/entity";
+import { BasicStatus, PermissionType } from "#/enum";
+
+interface MenuFormData {
+	menuName: string;
+	path: string;
+	perms: string;
+	component: string;
+	icon: string;
+	type: '0' | '1';
+	orderNum: number;
+	parentId: string;
+}
+
+const defaultPermissionValue: Permission_Old = {
+	id: "",
+	parentId: "",
+	name: "",
+	label: "",
+	route: "",
+	component: "",
+	icon: "",
+	hide: false,
+	status: BasicStatus.ENABLE,
+	type: PermissionType.CATALOGUE,
+};
+
+const defaultMenuValue: SystemMenu = {
+	menuId: null,
+	parentId: null,
+	menuName: "",
+	path: "",
+	perms: "",
+	component: "",
+	icon: "",
+	type: "0",
+	orderNum: 0,
+};
+
+// 树形节点接口
+interface TreeNode {
+	key: string;
+	title: string;
+	children: TreeNode[];
+	menuData: SystemMenu; // 保存原始菜单数据
+}
+
+// 构建菜单树形结构（参考doggy-ui实现）
+const buildMenuTree = (menus: SystemMenu[]): TreeNode[] => {
+	if (!menus || !menus.length) return [];
+	
+	const handle = (parentId: any): TreeNode[] => {
+		const arr: TreeNode[] = [];
+		menus.forEach((item) => {
+			if (item.parentId === parentId) {
+				const children = handle(item.menuId);
+				const curr: TreeNode = {
+					key: item.menuId || '',
+					title: item.menuName,
+					children,
+					menuData: item,
+				};
+				arr.push(curr);
+			}
+		});
+		return arr;
+	};
+	
+	return handle('0'); // 根节点的parentId是'0'
+};
+
+// 将树形结构转换为表格数据（带层级信息）
+const convertTreeToTableData = (treeNodes: TreeNode[], level = 0): SystemMenu[] => {
+	const result: SystemMenu[] = [];
+	
+	treeNodes.forEach(node => {
+		// 添加层级信息到菜单数据
+		const tableRow = {
+			...node.menuData,
+			level,
+		};
+		result.push(tableRow);
+		
+		// 递归处理子节点
+		if (node.children && node.children.length > 0) {
+			result.push(...convertTreeToTableData(node.children, level + 1));
+		}
+	});
+	
+	return result;
+};
+export default function PermissionPage() {
+	const { t } = useTranslation();
+	const [loading, setLoading] = useState(false);
+	const [menuList, setMenuList] = useState<SystemMenu[]>([]);
+	const [tableData, setTableData] = useState<SystemMenu[]>([]); // 用于表格显示的数据
+	const [selectedMenu, setSelectedMenu] = useState<SystemMenu | null>(null);
+	const [dialogOpen, setDialogOpen] = useState(false);
+	const [editingMenu, setEditingMenu] = useState<SystemMenu | null>(null);
+	const [isEdit, setIsEdit] = useState(false);
+
+	const [permissionModalProps, setPermissionModalProps] = useState<PermissionModalProps>({
+		formValue: { ...defaultPermissionValue },
+		title: "New",
+		show: false,
+		onOk: () => {
+			setPermissionModalProps((prev) => ({ ...prev, show: false }));
+		},
+		onCancel: () => {
+			setPermissionModalProps((prev) => ({ ...prev, show: false }));
+		},
+	});
+
+	const menuForm = useForm<MenuFormData>({
+		defaultValues: {
+			menuName: "",
+			path: "",
+			perms: "",
+			component: "",
+			icon: "",
+			type: "0",
+			orderNum: 0,
+			parentId: "",
+		},
+	});
+	const loadMenus = async () => {
+		setLoading(true);
+		try {
+			const response = await queryMenu();
+			console.log("API response:", response);
+			
+			// 处理响应数据，参考doggy-ui的实现
+			let menuData: SystemMenu[] = [];
+			if (Array.isArray(response)) {
+				menuData = response;
+			} else if (response && typeof response === 'object' && 'data' in response) {
+				menuData = (response as any).data || [];
+			}
+			
+			console.log("Menu data:", menuData);
+			setMenuList(menuData);
+			
+			// 构建树形结构并转换为表格数据
+			if (menuData.length > 0) {
+				const treeData = buildMenuTree(menuData);
+				console.log("Tree data:", treeData);
+				const flatTableData = convertTreeToTableData(treeData);
+				console.log("Table data:", flatTableData);
+				setTableData(flatTableData);
+			} else {
+				setTableData([]);
+			}
+		} catch (error) {
+			console.error("Failed to load menus:", error);
+			toast.error("加载菜单列表失败");
+			setTableData([]);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleMenuSubmit = async (data: MenuFormData) => {
+		try {
+			setLoading(true);
+			const menuData: SystemMenu = {
+				menuId: isEdit ? editingMenu?.menuId : null,
+				...data,
+				parentId: data.parentId || null,
+			};
+
+			if (isEdit) {
+				await updateMenu(menuData);
+				toast.success("修改菜单成功");
+			} else {
+				await addMenu(menuData);
+				toast.success("新增菜单成功");
+			}
+
+			setDialogOpen(false);
+			loadMenus();
+			if (!isEdit) {
+				menuForm.reset({
+					...defaultMenuValue,
+					parentId: selectedMenu?.menuId || null,
+				});
+			}
+		} catch (error) {
+			console.error("Failed to save menu:", error);
+			toast.error(isEdit ? "修改菜单失败" : "新增菜单失败");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleSelectMenu = (record: SystemMenu) => {
+		setSelectedMenu(record);
+		setIsEdit(true);
+		setEditingMenu(record);
+		menuForm.reset({
+			menuName: record.menuName,
+			path: record.path,
+			perms: record.perms || "",
+			component: record.component || "",
+			icon: record.icon || "",
+			type: record.type,
+			orderNum: record.orderNum,
+			parentId: record.parentId || "",
+		});
+	};
+
+	const handleCreateParentMenu = () => {
+		setEditingMenu(null);
+		setIsEdit(false);
+		menuForm.reset({
+			...defaultMenuValue,
+			parentId: null,
+		});
+		setDialogOpen(true);
+	};
+
+	const handleCreateChildMenu = () => {
+		if (!selectedMenu) {
+			toast.error("请先选择父级菜单");
+			return;
+		}
+		if (selectedMenu.type === '1') {
+			toast.error("按钮类型不能作为父级菜单");
+			return;
+		}
+		setEditingMenu(null);
+		setIsEdit(false);
+		menuForm.reset({
+			...defaultMenuValue,
+			parentId: selectedMenu.menuId,
+		});
+		setDialogOpen(true);
+	};
+
+	const handleDeleteMenu = () => {
+		if (!selectedMenu) {
+			toast.error("请先选择要删除的菜单");
+			return;
+		}
+		if (window.confirm("确定要删除该菜单吗？如果有子菜单将一并删除！")) {
+			deleteMenu(selectedMenu.menuId!).then(() => {
+				toast.success("删除菜单成功");
+				loadMenus();
+				setSelectedMenu(null);
+				menuForm.reset(defaultMenuValue);
+			}).catch(() => {
+				toast.error("删除菜单失败");
+			});
+		}
+	};
+
+	useEffect(() => {
+		loadMenus();
+	}, []);
+
+	const columns: ColumnsType<SystemMenu> = [
+		{
+			title: "菜单名称",
+			dataIndex: "menuName",
+			width: 250,
+			render: (text: string, record: SystemMenu) => {
+				const level = (record as any).level || 0;
+				const indent = level * 20;
+				return (
+					<div style={{ paddingLeft: `${indent}px` }} className="flex items-center">
+						{level > 0 && <Icon icon="mdi:subdirectory-arrow-right" size={16} className="mr-1 text-gray-400" />}
+						{text}
+					</div>
+				);
+			},
+		},
+		{
+			title: "类型",
+			dataIndex: "type",
+			width: 80,
+			render: (type: string) => (
+				<Badge variant={type === '0' ? 'default' : 'secondary'}>
+					{type === '0' ? '菜单' : '按钮'}
+				</Badge>
+			),
+		},
+		{
+			title: "图标",
+			dataIndex: "icon",
+			width: 60,
+			render: (icon: string) => {
+				if (isNil(icon)) return "";
+				if (icon.startsWith("ic")) {
+					return <Icon icon={`local:${icon}`} size={18} className="ant-menu-item-icon" />;
+				}
+				return <Icon icon={icon} size={18} className="ant-menu-item-icon" />;
+			},
+		},
+		{
+			title: "路径",
+			dataIndex: "path",
+			width: 150,
+		},
+		{
+			title: "组件",
+			dataIndex: "component",
+			width: 200,
+		},
+		{
+			title: "权限标识",
+			dataIndex: "perms",
+			width: 150,
+		},
+		{
+			title: "排序",
+			dataIndex: "orderNum",
+			width: 60,
+		},
+		{
+			title: "操作",
+			key: "operation",
+			align: "center",
+			width: 120,
+			render: (_, record) => (
+				<div className="flex w-full justify-center gap-1">
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => handleSelectMenu(record)}
+						title="选择"
+					>
+						<Icon icon="solar:check-circle-bold-duotone" size={18} />
+					</Button>
+					{record.type === '0' && (
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => onCreate(record.menuId)}
+							title="新增子菜单"
+						>
+							<Icon icon="gridicons:add-outline" size={18} />
+						</Button>
+					)}
+				</div>
+			),
+		},
+	];
+
+	const onCreate = (parentId?: string) => {
+		setPermissionModalProps((prev) => ({
+			...prev,
+			show: true,
+			...defaultPermissionValue,
+			title: "New",
+			formValue: { ...defaultPermissionValue, parentId: parentId ?? "" },
+		}));
+	};
+
+	const onEdit = (formValue: Permission_Old) => {
+		setPermissionModalProps((prev) => ({
+			...prev,
+			show: true,
+			title: "Edit",
+			formValue,
+		}));
+	};
+
+	return (
+		<>
+			<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+				{/* 左侧菜单树 */}
+				<Card className="lg:col-span-1">
+					<CardHeader>
+						<div className="flex items-center justify-between">
+							<div>菜单列表</div>
+							<div className="flex gap-2">
+								<Button size="sm" onClick={handleCreateParentMenu}>
+									<Icon icon="gridicons:add-outline" size={16} className="mr-1" />
+									新建菜单
+								</Button>
+								<Button size="sm" variant="outline" onClick={handleCreateChildMenu}>
+									<Icon icon="gridicons:add-outline" size={16} className="mr-1" />
+									新建子菜单
+								</Button>
+								<Button 
+									size="sm" 
+									variant="outline" 
+									onClick={handleDeleteMenu}
+									className="text-red-600 border-red-600 hover:bg-red-50 hover:text-red-700"
+								>
+									<Icon icon="mingcute:delete-2-fill" size={16} className="mr-1" />
+									删除
+								</Button>
+							</div>
+						</div>
+					</CardHeader>
+					<CardContent>
+						<Table
+							rowKey="menuId"
+							size="small"
+							scroll={{ x: "max-content", y: 400 }}
+							pagination={false}
+							columns={columns}
+							dataSource={tableData}
+							loading={loading}
+							rowClassName={(record) => 
+								selectedMenu?.menuId === record.menuId ? 'bg-blue-50' : ''
+							}
+							onRow={(record) => ({
+								onClick: () => handleSelectMenu(record),
+							})}
+						/>
+					</CardContent>
+				</Card>
+
+				{/* 右侧表单 */}
+				<Card className="lg:col-span-2">
+					<CardHeader>
+						<div className="flex items-center justify-between">
+							<div>菜单详情</div>
+							<div>{selectedMenu ? `编辑: ${selectedMenu.menuName}` : '请选择菜单'}</div>
+						</div>
+					</CardHeader>
+					<CardContent>
+						{selectedMenu ? (
+							<Form {...menuForm}>
+								<form onSubmit={menuForm.handleSubmit(handleMenuSubmit)} className="space-y-6">
+									<div className="grid grid-cols-2 gap-4">
+										<FormField
+											control={menuForm.control}
+											name="menuName"
+											rules={{ required: "请输入菜单名称" }}
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>菜单名称</FormLabel>
+													<FormControl>
+														<Input placeholder="请输入菜单名称" {...field} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+										<FormField
+											control={menuForm.control}
+											name="type"
+											rules={{ required: "请选择菜单类型" }}
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>菜单类型</FormLabel>
+													<FormControl>
+														<RadioGroup
+															onValueChange={field.onChange}
+															value={field.value}
+														>
+															<div className="flex items-center space-x-2">
+																<RadioGroupItem value="0" id="menu" />
+																<Label htmlFor="menu">菜单</Label>
+															</div>
+															<div className="flex items-center space-x-2">
+																<RadioGroupItem value="1" id="button" />
+																<Label htmlFor="button">按钮</Label>
+															</div>
+														</RadioGroup>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</div>
+
+									{menuForm.watch("type") === "0" && (
+										<>
+											<div className="grid grid-cols-2 gap-4">
+												<FormField
+													control={menuForm.control}
+													name="icon"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>菜单图标</FormLabel>
+															<FormControl>
+																<Input placeholder="请输入菜单图标" {...field} />
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+												<FormField
+													control={menuForm.control}
+													name="orderNum"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>排序号</FormLabel>
+															<FormControl>
+																<Input
+																	type="number"
+																	placeholder="请输入排序号"
+																	{...field}
+																	onChange={(e) => field.onChange(Number(e.target.value))}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+											</div>
+
+											<div className="grid grid-cols-2 gap-4">
+												<FormField
+													control={menuForm.control}
+													name="path"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>菜单路径</FormLabel>
+															<FormControl>
+																<Input placeholder="请输入菜单路径" {...field} />
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+												<FormField
+													control={menuForm.control}
+													name="component"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>组件路径</FormLabel>
+															<FormControl>
+																<Input placeholder="请输入组件路径" {...field} />
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+											</div>
+										</>
+									)}
+
+									<div className="grid grid-cols-1 gap-4">
+										<FormField
+											control={menuForm.control}
+											name="perms"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>权限标识</FormLabel>
+													<FormControl>
+														<Textarea placeholder="请输入权限标识" {...field} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</div>
+
+									<div className="flex justify-end space-x-2">
+										<Button type="submit" disabled={loading}>
+											{loading ? "保存中..." : "保存"}
+										</Button>
+									</div>
+								</form>
+							</Form>
+						) : (
+							<div className="text-center text-gray-500 py-8">
+								请从左侧选择一个菜单进行编辑
+							</div>
+						)}
+					</CardContent>
+				</Card>
+			</div>
+
+			{/* 菜单编辑弹出框 */}
+			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+				<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+					<DialogHeader>
+						<DialogTitle>{isEdit ? "编辑菜单" : "新增菜单"}</DialogTitle>
+					</DialogHeader>
+					<Form {...menuForm}>
+						<form onSubmit={menuForm.handleSubmit(handleMenuSubmit)} className="space-y-6">
+							<div className="grid grid-cols-2 gap-4">
+								<FormField
+									control={menuForm.control}
+									name="menuName"
+									rules={{ required: "请输入菜单名称" }}
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>菜单名称</FormLabel>
+											<FormControl>
+												<Input placeholder="请输入菜单名称" {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={menuForm.control}
+									name="type"
+									rules={{ required: "请选择菜单类型" }}
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>菜单类型</FormLabel>
+											<FormControl>
+												<RadioGroup
+													onValueChange={field.onChange}
+													value={field.value}
+												>
+													<div className="flex items-center space-x-2">
+														<RadioGroupItem value="0" id="modal-menu" />
+														<Label htmlFor="modal-menu">菜单</Label>
+													</div>
+													<div className="flex items-center space-x-2">
+														<RadioGroupItem value="1" id="modal-button" />
+														<Label htmlFor="modal-button">按钮</Label>
+													</div>
+												</RadioGroup>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
+
+							{menuForm.watch("type") === "0" && (
+								<>
+									<div className="grid grid-cols-2 gap-4">
+										<FormField
+											control={menuForm.control}
+											name="icon"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>菜单图标</FormLabel>
+													<FormControl>
+														<Input placeholder="请输入菜单图标" {...field} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+										<FormField
+											control={menuForm.control}
+											name="orderNum"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>排序号</FormLabel>
+													<FormControl>
+														<Input
+															type="number"
+															placeholder="请输入排序号"
+															{...field}
+															onChange={(e) => field.onChange(Number(e.target.value))}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</div>
+
+									<div className="grid grid-cols-2 gap-4">
+										<FormField
+											control={menuForm.control}
+											name="path"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>菜单路径</FormLabel>
+													<FormControl>
+														<Input placeholder="请输入菜单路径" {...field} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+										<FormField
+											control={menuForm.control}
+											name="component"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>组件路径</FormLabel>
+													<FormControl>
+														<Input placeholder="请输入组件路径" {...field} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</div>
+								</>
+							)}
+
+							<div className="grid grid-cols-1 gap-4">
+								<FormField
+									control={menuForm.control}
+									name="perms"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>权限标识</FormLabel>
+											<FormControl>
+												<Textarea placeholder="请输入权限标识" {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
+
+							<div className="flex justify-end space-x-2">
+								<Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+									取消
+								</Button>
+								<Button type="submit" disabled={loading}>
+									{loading ? "保存中..." : (isEdit ? "更新" : "新增")}
+								</Button>
+							</div>
+						</form>
+					</Form>
+				</DialogContent>
+			</Dialog>
+		</>
+	);
+}

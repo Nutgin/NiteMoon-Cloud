@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>nitemoon-onnx</artifactId>
+
+    <parent>
+        <artifactId>nitemoon-biz</artifactId>
+        <groupId>cn.nitemoon</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <description>视觉推理模块</description>
+
+    <dependencies>
+        <!--注册中心客户端-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+        <!--配置中心客户端-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+        <!--web 模块-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!--数据库-->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-3-starter</artifactId>
+        </dependency>
+        <!--            mybatis-plus-->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
+        <!--            文件存储模块-->
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-common-storage</artifactId>
+        </dependency>
+        <!--           日志模块-->
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-common-log</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-common-demo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-upms-api</artifactId>
+        </dependency>
+        <!--           短信公共模块-->
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-common-sms</artifactId>
+        </dependency>
+        <!--            安全模块-->
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-common-security</artifactId>
+        </dependency>
+        <!--           redis 缓存-->
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-common-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-common-datasource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-common-sentinel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.nitemoon</groupId>
+            <artifactId>nitemoon-common-dubbo</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>cn.nitemoon</groupId>
+                    <artifactId>nitemoon-common-mybatis</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.microsoft.onnxruntime</groupId>
+            <artifactId>onnxruntime</artifactId>
+            <version>1.16.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.21.12</version>
+        </dependency>
+
+        <!--        <dependency> 切换gpu后一定要maven update,否则会报错 onnxruntime 和 onnxruntime_gpu不能同时使用，使用这个请注释上面那个
+                    <groupId>com.microsoft.onnxruntime</groupId>
+                    <artifactId>onnxruntime_gpu</artifactId>
+                    <version>1.16.1</version>
+                </dependency>-->
+
+        <!--
+        本质上是使用opencv 和 ffmpeg
+        用 javacv-platform 和  ffmpeg-platform 两个pom依赖，可以完全摆脱，dll和so依赖库，不需要引入任何外部依赖，真正做到linux上可运行，但是这两个库大小2-3G，可以缩小有兴趣自己研究。
+        https://blog.csdn.net/boling_cavalry/article/details/119062543
+        https://blog.csdn.net/eguid_1/article/details/117277841
+        https://www.ithere.net/article/1486255614874501122
+        -->
+
+        <!--  <dependency>
+             <groupId>org.bytedeco</groupId>
+             <artifactId>javacv-platform</artifactId>
+             <version>1.5.7</version>
+         </dependency> -->
+
+        <!-- javacv 和 opencv 别同时用，先去搜搜这两个有什么区别，如果打开上面注释就要注释下面的opencv  -->
+        <dependency>
+            <groupId>org.openpnp</groupId>
+            <artifactId>opencv</artifactId>
+            <version>4.8.1</version>
+        </dependency>
+        <!-- OkHttp3 for HTTP requests -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.9.3</version>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>cloud</id>
+            <activation>
+                <!-- 默认环境 -->
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <finalName>${project.artifactId}</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>boot</id>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <includes>
+                            <include>**/*</include>
+                        </includes>
+                        <filtering>false</filtering>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+    </profiles>
+</project>

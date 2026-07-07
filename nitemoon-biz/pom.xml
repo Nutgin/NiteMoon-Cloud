@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>nitemoon-cloud</artifactId>
+        <groupId>cn.nitemoon</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>nitemoon-biz</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>nitemoon-upms</module>
+        <module>nitemoon-generator</module>
+        <module>nitemoon-monitor</module>
+        <module>nitemoon-onnx</module>
+        <module>nitemoon-llm</module>
+    </modules>
+
+</project>

@@ -1,0 +1,53 @@
+{
+	"dashboard": {
+		"workbench": {
+			"welcome": "欢迎回来",
+			"todayNews": "今日新闻",
+			"hotTopics": "热门话题",
+			"quickActions": "快捷操作",
+			"recentActivity": "最近活动",
+			"statistics": "统计信息",
+			"totalUsers": "总用户数",
+			"activeUsers": "活跃用户",
+			"totalProjects": "总项目数",
+			"revenue": "收入",
+			"historyToday": "历史上的今天",
+			"historySource": "数据来源：历史API",
+			"zhihuNews": "知乎新闻快报",
+			"zhihuSource": "数据来源：知乎日报",
+			"loadHistoryFailed": "获取历史数据失败",
+			"loadNewsFailed": "获取新闻数据失败",
+			"networkError": "网络请求失败"
+		},
+		"code": {
+			"title": "代码编辑器",
+			"language": "语言:",
+			"run": "运行",
+			"exit": "退出",
+			"fullscreen": "全屏",
+			"format": "格式化",
+			"copy": "复制",
+			"download": "下载",
+			"reset": "重置",
+			"loading": "加载编辑器中...",
+			"htmlPreview": "HTML 预览",
+			"codeOutput": "代码输出",
+			"clear": "清空",
+			"waiting": "等待代码执行...",
+			"outputPlaceholder": "输出结果将显示在这里",
+			"saveCode": "保存代码:",
+			"copied": "代码已复制到剪贴板",
+			"copyFailed": "复制失败:",
+			"runError": "运行错误:",
+			"execFailed": "执行失败:",
+			"htmlRendered": "HTML 已渲染到预览窗口",
+			"jsxTransform": "JSX 代码需要转换..."
+		},
+		"analysis": {
+			"title": "分析页面",
+			"overview": "概览",
+			"trends": "趋势",
+			"statistics": "统计"
+		}
+	}
+}

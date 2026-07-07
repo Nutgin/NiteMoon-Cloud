@@ -1,0 +1,163 @@
+server:
+  port: 8000
+  servlet:
+    context-path: /boot
+spring:
+  application:
+    name: @project.artifactId@
+  cloud:
+    nacos:
+      config:
+        enabled: false
+      discovery:
+        enabled: false
+  profiles:
+    active: dev  # 开发环境
+
+jackson:
+  default-property-inclusion: always
+  date-format: yyyy-mm-dd hh:mm:ss
+
+sa-token:
+  token-name: Authorization
+  timeout: 7200
+  active-timeout: 1800
+  token-time-auto-renew: true
+  is-concurrent: true
+  is-share: false
+  is-read-cookie: false
+  token-style: uuid
+  is-log: true
+  is-print: false
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/*Mapper.xml
+  type-handlers-package: cn.nitemoon.cloud.common.myabtis.handler
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+      where-strategy: not_empty
+      insert-strategy: not_empty
+      update-strategy: not_null
+  configuration:
+    jdbc-type-for-null: 'null'
+    call-setters-on-nulls: true
+    shrink-whitespaces-in-sql: true
+
+# springdoc-openapi项目配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'boot'
+      paths-to-match: '/**'
+      #生成文档所需的扫包路径，一般为启动类目录
+      packages-to-scan: cn.nitemoon.cloud
+
+logging:
+  level:
+    cn.nitemoon.cloud.upms.mapper: DEBUG
+    cn.nitemoon.cloud.user.mapper: DEBUG
+    cn.nitemoon.cloud.distribution.mapper: DEBUG
+    cn.nitemoon.cloud.miniapp.mapper: DEBUG
+    cn.nitemoon.cloud.order.mapper: DEBUG
+    cn.nitemoon.cloud.pay.mapper: DEBUG
+    cn.nitemoon.cloud.product.mapper: DEBUG
+    cn.nitemoon.cloud.promotion.mapper: DEBUG
+    org.mybatis.spring.SqlSessionFactoryBean: DEBUG
+
+dubbo:
+  scan:
+    base-packages: cn.nitemoon.cloud
+  application:
+    name: nitemoon-boot
+    # 暂时解决dubbo 反序列化问题
+    serialize-check-status: WARN
+  protocol:
+    name: injvm
+    port: -1
+  registry:
+    address: N/A
+  provider:
+    filter: -exception
+seata:
+  enabled: false
+
+secure:
+  ignore:
+    urls:
+      - /swagger-resources/**
+      - /webjars/**
+      - /v3/api-docs/**
+      - /swagger-ui.html/**
+      - /doc.html/**
+      - /error/**
+      - /favicon.ico/**
+      - /swagger-ui/**
+      - /actuator/**
+      - /token/**
+      - /toc-token/**
+      - /code/**
+      - /sms/**
+      - /user/check/phone
+      - /tenant/register
+      - /tenantpackage/list
+      - /notify/**
+      - /file/*/get/**
+      - /v1/chat/completions
+      - /aigc/chat/public/**
+      - /aigc/app/public/**
+
+nitemoon:
+  cloud:
+    enable: false
+  tenant:
+    tables:
+      - sys_user
+      - sys_user_role
+      - sys_role_menu
+      - sys_role
+      - sys_login_log
+      - sys_log
+      - sys_dept
+      - sys_tenant_menu
+
+  swagger:
+    enabled: true
+    title: AI Platform
+    description:
+    version: v1.0.0
+    author: nitemoon
+    email: nugin@foxmail.com
+    license: Apache 2.0
+    license-url:
+
+  auth:
+    code:
+      time: 120
+      type: png
+      width: 115
+      height: 42
+      length: 4
+      char-type: 2
+    wechat:
+      # 微信小程序AppID（必填）
+      app-id: xxxxxxx
+      # 微信小程序AppSecret（必填）
+      app-secret: xxxxxxx
+
+# 代码生成
+gen:
+  # 作者
+  author: nitemoon
+  # 默认生成包路径 system 需改成自己的模块名称 如 system monitor tool
+  packageName: cn.nitemoon.cloud
+  # 自动去除表前缀，默认是false
+  autoRemovePre: false
+  # 表前缀（生成类名不会包含表前缀，多个用逗号分隔）
+  tablePrefix: sys_
+  # 是否允许生成文件覆盖到本地（自定义路径），默认不允许
+  allowOverwrite: false

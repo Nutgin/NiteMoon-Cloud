@@ -1,0 +1,370 @@
+import { Icon } from "@/components/icon";
+import { Badge } from "@/ui/badge";
+import { Button } from "@/ui/button";
+import { Card, CardContent, CardHeader } from "@/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/ui/form";
+import { Input } from "@/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/select";
+import { Table } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { useState, useEffect } from "react";
+import {
+  query${ClassName},
+  delete${ClassName},
+  add${ClassName},
+  update${ClassName},
+  type ${ClassName},
+  type ${ClassName}QueryParams,
+} from "@/api/services/${moduleName}/${businessName}Service";
+
+interface SearchFormData {
+#foreach($column in $columns)
+#if($column.isQuery)
+  ${column.javaField}: string;
+#end
+#end
+}
+
+interface EntityFormData {
+#foreach($column in $columns)
+#if(!$column.isSuperColumn() && !$column.isPk)
+  ${column.javaField}#if($column.isInsert): string#else?: string#end;
+#end
+#end
+}
+
+export default function ${BusinessName}Page() {
+  const [loading, setLoading] = useState(false);
+  const [dataList, setDataList] = useState<${ClassName}[]>([]);
+  const [total, setTotal] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<${ClassName} | null>(null);
+  const [isEdit, setIsEdit] = useState(false);
+
+  const searchForm = useForm<SearchFormData>({
+    defaultValues: {
+#foreach($column in $columns)
+#if($column.isQuery)
+      ${column.javaField}: "",
+#end
+#end
+    },
+  });
+
+  const entityForm = useForm<EntityFormData>({
+    defaultValues: {
+#foreach($column in $columns)
+#if(!$column.isSuperColumn() && !$column.isPk)
+      ${column.javaField}: "",
+#end
+#end
+    },
+  });
+
+  const loadData = async (params?: Partial<${ClassName}QueryParams>) => {
+    setLoading(true);
+    try {
+      const queryParams: ${ClassName}QueryParams = {
+        pageNum: currentPage,
+        pageSize: pageSize,
+        ...params,
+      };
+      const response = await query${ClassName}(queryParams);
+      const records = response.records || response.rows || [];
+      const totalCount = response.total || 0;
+      setDataList(records);
+      setTotal(totalCount);
+    } catch (error) {
+      console.error("Failed to load data:", error);
+      toast.error("加载列表失败");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = (values: SearchFormData) => {
+    setCurrentPage(1);
+    loadData(values);
+  };
+
+  const handleReset = () => {
+    searchForm.reset();
+    setCurrentPage(1);
+    loadData({});
+  };
+
+  const handleAdd = () => {
+    setEditingRecord(null);
+    setIsEdit(false);
+    entityForm.reset({
+#foreach($column in $columns)
+#if(!$column.isSuperColumn() && !$column.isPk)
+      ${column.javaField}: "",
+#end
+#end
+    });
+    setDialogOpen(true);
+  };
+
+  const handleEdit = (record: ${ClassName}) => {
+    setEditingRecord(record);
+    setIsEdit(true);
+    entityForm.reset({
+#foreach($column in $columns)
+#if(!$column.isSuperColumn() && !$column.isPk)
+      ${column.javaField}: record.${column.javaField} || "",
+#end
+#end
+    });
+    setDialogOpen(true);
+  };
+
+  const handleSubmit = async (data: EntityFormData) => {
+    try {
+      setLoading(true);
+      const entityData: any = {
+        ...data,
+#foreach($column in $columns)
+#if($column.isPk)
+        ${column.javaField}: isEdit ? editingRecord?.${column.javaField} : undefined,
+#end
+#end
+      };
+
+      if (isEdit) {
+        await update${ClassName}(entityData);
+        toast.success("修改成功");
+      } else {
+        await add${ClassName}(entityData);
+        toast.success("新增成功");
+      }
+
+      setDialogOpen(false);
+      loadData();
+    } catch (error) {
+      console.error("Failed to save:", error);
+      toast.error(isEdit ? "修改失败" : "新增失败");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = (record: ${ClassName}) => {
+    if (window.confirm("确定要删除该${functionName}吗？")) {
+#foreach($column in $columns)
+#if($column.isPk)
+      delete${ClassName}(record.${column.javaField}).then(() => {
+        toast.success("删除成功");
+        loadData();
+      });
+#end
+#end
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [currentPage, pageSize]);
+
+  const columns: ColumnsType<${ClassName}> = [
+#foreach($column in $columns)
+#if($column.isPk || $column.list)
+#set($parentheseIndex=$column.columnComment.indexOf("（"))
+#if($parentheseIndex != -1)
+#set($comment=$column.columnComment.substring(0, $parentheseIndex))
+#else
+#set($comment=$column.columnComment)
+#end
+    {
+      title: "${comment}",
+      dataIndex: "${column.javaField}",
+      width: 120,
+#if($column.isPk)
+      align: "center" as const,
+#end
+    },
+#end
+#end
+    {
+      title: "创建时间",
+      dataIndex: "createTime",
+      width: 150,
+    },
+    {
+      title: "操作",
+      key: "operation",
+      align: "center" as const,
+      width: 200,
+      render: (_: any, record: ${ClassName}) => (
+        <div className="flex w-full justify-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleEdit(record)}
+            title="编辑"
+          >
+            <Icon icon="solar:pen-bold-duotone" size={18} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleDelete(record)}
+            title="删除"
+          >
+            <Icon icon="mingcute:delete-2-fill" size={18} className="text-error" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>${functionName}列表</div>
+            <Button onClick={handleAdd}>新增${functionName}</Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Form {...searchForm}>
+            <form onSubmit={searchForm.handleSubmit(handleSearch)} className="space-y-4">
+              <div className="flex gap-4 items-end">
+#foreach($column in $columns)
+#if($column.isQuery)
+#set($parentheseIndex=$column.columnComment.indexOf("（"))
+#if($parentheseIndex != -1)
+#set($comment=$column.columnComment.substring(0, $parentheseIndex))
+#else
+#set($comment=$column.columnComment)
+#end
+                <FormField
+                  control={searchForm.control}
+                  name="${column.javaField}"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>${comment}</FormLabel>
+                      <FormControl>
+                        <Input placeholder="请输入${comment}" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+#end
+#end
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={loading}>
+                    <Icon icon="mdi:magnify" size={18} className="mr-2" />
+                    搜索
+                  </Button>
+                  <Button type="button" variant="outline" onClick={handleReset}>
+                    <Icon icon="mdi:refresh" size={18} className="mr-2" />
+                    重置
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-4">
+        <CardContent>
+          <Table
+            rowKey="${pkColumn.javaField}"
+            size="small"
+            scroll={{ x: "max-content" }}
+            pagination={{
+              current: currentPage,
+              pageSize: pageSize,
+              total: total,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) => `第 \${range[0]}-\${range[1]} 条/共 \${total} 条`,
+              onChange: (page, size) => {
+                setCurrentPage(page);
+                setPageSize(size || 10);
+              },
+            }}
+            loading={loading}
+            columns={columns}
+            dataSource={dataList}
+          />
+        </CardContent>
+      </Card>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{isEdit ? "编辑${functionName}" : "新增${functionName}"}</DialogTitle>
+          </DialogHeader>
+          <Form {...entityForm}>
+            <form onSubmit={entityForm.handleSubmit(handleSubmit)} className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+#foreach($column in $columns)
+#if($column.isInsert && !$column.isPk && !$column.isSuperColumn())
+#set($parentheseIndex=$column.columnComment.indexOf("（"))
+#if($parentheseIndex != -1)
+#set($comment=$column.columnComment.substring(0, $parentheseIndex))
+#else
+#set($comment=$column.columnComment)
+#end
+                <FormField
+                  control={entityForm.control}
+                  name="${column.javaField}"
+#if($column.isRequired)
+                  rules={{ required: "请输入${comment}" }}
+#end
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>${comment}</FormLabel>
+                      <FormControl>
+#if($column.htmlType == "textarea")
+                        <Input placeholder="请输入${comment}" {...field} />
+#elseif($column.htmlType == "select" || $column.htmlType == "radio")
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="请选择${comment}" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="0">选项一</SelectItem>
+                            <SelectItem value="1">选项二</SelectItem>
+                          </SelectContent>
+                        </Select>
+#elseif($column.htmlType == "datetime")
+                        <Input type="datetime-local" placeholder="请选择${comment}" {...field} />
+#else
+                        <Input placeholder="请输入${comment}" {...field} />
+#end
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+#end
+#end
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                  取消
+                </Button>
+                <Button type="submit" disabled={loading}>
+                  {loading ? "保存中..." : (isEdit ? "更新" : "新增")}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
