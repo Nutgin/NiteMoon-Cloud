@@ -253,8 +253,7 @@ We also provide secondary development, custom development, and technical consult
 
 Try the live demo at: **[platform.nitemoon.cn](https://platform.nitemoon.cn)**
 
-- **Username**: `demo`
-- **Password**: `Demo2026`
+- **you can login by github**
 
 ## Use Cases
 
