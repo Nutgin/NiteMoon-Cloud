@@ -254,7 +254,7 @@ Nitemoon Cloud 提供开源版和商业版两种选择：
 在线体验地址：**[platform.nitemoon.cn](https://platform.nitemoon.cn)**
 
 - **用户名**：`demo`
-- **密码**：`UhOtrDnzRh`
+- **密码**：`Demo2026`
 
 ## 应用场景
 
